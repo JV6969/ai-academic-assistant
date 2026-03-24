@@ -14,23 +14,44 @@ app.get('/', (req, res) => {
 
 // Analyze route
 app.post('/analyze', (req, res) => {
-    const text = req.body.text.toLowerCase();
+    const text = req.body.text;
 
     let assignments = [];
     let events = [];
 
-    // Simple keyword detection
-    if (text.includes("assignment")) {
-        assignments.push("Assignment detected");
-    }
+    // Split into sentences
+    const sentences = text.split(/[.]/);
 
-    if (text.includes("quiz") || text.includes("test") || text.includes("exam")) {
-        events.push("Exam/Quiz detected");
-    }
+    sentences.forEach(sentence => {
+        const s = sentence.toLowerCase();
 
-    if (text.includes("submit") || text.includes("deadline") || text.includes("due")) {
-        assignments.push("Deadline mentioned");
-    }
+        // Assignment detection
+        if (s.includes("assignment")) {
+           let name = sentence.replace(/submit|by/gi, "").trim();
+
+            // Extract date (simple regex)
+            let dateMatch = sentence.match(
+                /\b(\d{1,2}\s?(jan|feb|march|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*)\b/i
+            );
+
+            let date = dateMatch ? dateMatch[0] : "No date";
+
+            assignments.push(`${name} (${date})`);
+        }
+
+        // Event detection
+        if (s.includes("quiz") || s.includes("test") || s.includes("exam")) {
+            let name = sentence.trim();
+
+            let dateMatch = sentence.match(
+                /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i
+            );
+
+            let date = dateMatch ? dateMatch[0] : "No date";
+
+            events.push(`${name} (${date})`);
+        }
+    });
 
     res.json({
         assignments,
