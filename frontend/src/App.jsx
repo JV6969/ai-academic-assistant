@@ -3,6 +3,7 @@ import { useState } from "react";
 function App() {
   const [text, setText] = useState("");
   const [result, setResult] = useState(null);
+  
 
   const analyzeText = async () => {
     const response = await fetch("http://localhost:3000/analyze", {
@@ -16,6 +17,19 @@ function App() {
     const data = await response.json();
     setResult(data);
   };
+
+  const uploadFile = async () => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("http://localhost:3000/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await response.json();
+  setResult(data);
+};
 
   return (
     <div style={{ padding: "20px" }}>
@@ -32,6 +46,10 @@ function App() {
       <br /><br />
 
       <button onClick={analyzeText}>Analyze</button>
+
+      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+<br /><br />
+<button onClick={uploadFile}>Upload File</button>
 
       <h2>Results:</h2>
 
